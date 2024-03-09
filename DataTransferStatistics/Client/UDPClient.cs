@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 
-namespace DataTransferStatisticsClient
+namespace DataTransferClient
 {
     internal class UDPClient
     {
