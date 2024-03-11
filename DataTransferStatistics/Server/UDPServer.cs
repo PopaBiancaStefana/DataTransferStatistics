@@ -5,35 +5,50 @@ using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 
-namespace DataTransferServer
+namespace Server
 {
-    internal class UDPServer
+    public class UDPServer
     {
-        static void Main(string[] args)
+        private readonly int port;
+        private bool isRunning = false;
+
+        public UDPServer(int port)
         {
-            const int listenPort = 11000;
+            this.port = port;
+        }
 
-            using (var udpClient = new UdpClient(listenPort))
+        public void Run(bool useStopAndWait)
+        {
+            using var server = new UdpClient(port);
+
+            Console.WriteLine($"UDP Server listening on port {port}...");
+            IPEndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 0);
+            int totalBytesReceived = 0;
+            int totalMessagesReceived = 0;
+            isRunning = true;
+
+            try
             {
-                var remoteEndPoint = new IPEndPoint(IPAddress.Any, listenPort);
-                Console.WriteLine("UDP Server listening on port " + listenPort);
-
-                try
+                while (isRunning)
                 {
-                    while (true)
-                    {
-                        Console.WriteLine("Waiting for a message...");
-                        byte[] receivedBytes = udpClient.Receive(ref remoteEndPoint);
-                        string receivedMessage = Encoding.ASCII.GetString(receivedBytes);
+                    byte[] receivedData = server.Receive(ref clientEndPoint);
+                    totalBytesReceived += receivedData.Length;
+                    totalMessagesReceived++;
 
-                        Console.WriteLine($"Received: {receivedMessage} from {remoteEndPoint}");
-                    }
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.ToString());
+                    // Optionally send acknowledgment for stop-and-wait mechanism
                 }
             }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+
+            Console.WriteLine($"From Server - Protocol: UDP, Messages read: {totalMessagesReceived}, Bytes read: {totalBytesReceived}");
+        }
+
+        public void Stop()
+        {
+            isRunning = false;
         }
     }
 }

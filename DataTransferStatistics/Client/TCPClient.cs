@@ -1,28 +1,30 @@
 ﻿using System;
-using System.Net;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Net;
+using System.Threading.Tasks;
 using System.Net.Sockets;
 using System.Diagnostics;
 
 namespace Client
 {
-    public class UDPClient
+    public class TCPClient
     {
         private readonly string server;
         private readonly int port;
 
-        public UDPClient(string server, int port)
+        public TCPClient(string server, int port)
         {
             this.server = server;
             this.port = port;
         }
-
-        public void SendMessage(int messageSize, int totalBytesToSend, bool useStopAndWait)
+        public async Task SendMessage(int messageSize, int totalBytesToSend, bool useStopAndWait)
         {
-            using var client = new UdpClient();
-            var serverEndPoint = new IPEndPoint(IPAddress.Parse(server), port);
+            using var client = new TcpClient();
+
+            await client.ConnectAsync(server, port);
+            var networkStream = client.GetStream();
 
             byte[] message = new byte[messageSize];
             new Random().NextBytes(message);
@@ -33,18 +35,14 @@ namespace Client
 
             while (bytesSent < totalBytesToSend)
             {
-                client.Send(message, message.Length, serverEndPoint);
+                await networkStream.WriteAsync(message, 0, message.Length);
                 bytesSent += message.Length;
                 messagesSent++;
-
-                if (useStopAndWait)
-                {
-                    // Implement logic for stop-and-wait acknowledgement
-                }
             }
 
             stopwatch.Stop();
-            Console.WriteLine($"From Client - Protocol: TCP, Transmission time: {stopwatch.ElapsedMilliseconds} ms, Messages sent: {messagesSent}, Bytes sent: {bytesSent}");
+            var mechanismUsed = useStopAndWait ? "Stop-and-Wait" : "Streaming";
+            Console.WriteLine($"From Client - Transmission time: {stopwatch.ElapsedMilliseconds} ms, Messages sent: {messagesSent}, Bytes sent: {bytesSent}, Mechanism used: {mechanismUsed}");
         }
     }
 }
