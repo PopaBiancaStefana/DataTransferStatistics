@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 
 namespace Server
 {
@@ -37,7 +33,7 @@ namespace Server
             }
             catch (SocketException)
             {
-                Console.WriteLine("Server stopped.");
+                Console.WriteLine("TCP Server stopped.\n");
             }
         }
 
@@ -47,19 +43,26 @@ namespace Server
             int totalMessagesReceived = 0;
             try
             {
-                using var nerworkStream = client.GetStream();
+                using var clientStream = client.GetStream();
                 var buffer = new byte[65535];
                 int bytesRead;
 
-                while ((bytesRead = await nerworkStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                while ((bytesRead = await clientStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                 {
                     totalBytesReceived += bytesRead;
                     totalMessagesReceived++;
+
+                    if (UseStopAndWait)
+                    {
+                        string ack = "ACK";
+                        byte[] ackBytes = Encoding.UTF8.GetBytes(ack);
+                        await clientStream.WriteAsync(ackBytes, 0, ackBytes.Length);
+                    }
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                Console.WriteLine("Client connection closed.");
             }
             finally
             {

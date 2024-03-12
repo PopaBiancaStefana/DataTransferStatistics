@@ -1,7 +1,4 @@
-﻿using System;
-using System.Net;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Net;
 using System.Text;
 using System.Net.Sockets;
 using System.Diagnostics;
@@ -19,7 +16,7 @@ namespace Client
             this.port = port;
         }
 
-        public void SendMessage(int messageSize, int totalBytesToSend, bool useStopAndWait)
+        public async Task SendMessage(int messageSize, int totalBytesToSend, bool useStopAndWait)
         {
             using var client = new UdpClient();
             var serverEndPoint = new IPEndPoint(IPAddress.Parse(server), port);
@@ -33,18 +30,24 @@ namespace Client
 
             while (bytesSent < totalBytesToSend)
             {
-                client.Send(message, message.Length, serverEndPoint);
+                await client.SendAsync(message, message.Length, serverEndPoint);
                 bytesSent += message.Length;
                 messagesSent++;
 
                 if (useStopAndWait)
                 {
-                    // Implement logic for stop-and-wait acknowledgement
+                    UdpReceiveResult receivedResult = await client.ReceiveAsync();
+                    string ack = Encoding.UTF8.GetString(receivedResult.Buffer);
+                    if (ack != "ACK")
+                    {
+                        throw new Exception("ACK not received or incorrect.");
+                    }
                 }
             }
 
             stopwatch.Stop();
-            Console.WriteLine($"From Client - Protocol: TCP, Transmission time: {stopwatch.ElapsedMilliseconds} ms, Messages sent: {messagesSent}, Bytes sent: {bytesSent}");
+            var mechanismUsed = useStopAndWait ? "Stop-and-Wait" : "Streaming";
+            Console.WriteLine($"From Client - Protocol: UDP, Transmission time: {stopwatch.ElapsedMilliseconds} ms, Messages sent: {messagesSent}, Bytes sent: {bytesSent}, Mechanism used: {mechanismUsed}");
         }
     }
 }

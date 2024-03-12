@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Net;
-using System.Threading.Tasks;
+﻿using System.Text;
 using System.Net.Sockets;
 using System.Diagnostics;
 
@@ -38,11 +33,28 @@ namespace Client
                 await networkStream.WriteAsync(message, 0, message.Length);
                 bytesSent += message.Length;
                 messagesSent++;
+
+                if (useStopAndWait)
+                {
+                    await ReadACK(networkStream);
+                }
             }
 
             stopwatch.Stop();
             var mechanismUsed = useStopAndWait ? "Stop-and-Wait" : "Streaming";
             Console.WriteLine($"From Client - Transmission time: {stopwatch.ElapsedMilliseconds} ms, Messages sent: {messagesSent}, Bytes sent: {bytesSent}, Mechanism used: {mechanismUsed}");
+        }
+
+        async Task ReadACK(NetworkStream networkStream)
+        {
+            var ackBuffer = new byte[3];
+            int bytesRead = await networkStream.ReadAsync(ackBuffer, 0, ackBuffer.Length);
+            string ack = Encoding.UTF8.GetString(ackBuffer, 0, bytesRead);
+
+            if (ack != "ACK")
+            {
+                Console.WriteLine("ACK not received or incorrect.");
+            }
         }
     }
 }
