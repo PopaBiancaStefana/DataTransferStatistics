@@ -10,20 +10,20 @@ namespace DataTransferS
             DataTransfer data = new DataTransfer();
 
 
-            //Console.WriteLine("Testing TCP protocol, single client,various messages sizes, streaming vs stop and await mechanisms");
-            //// Sending 1 MB = 1048576 bytes, 500 MB = 524288000 bytes and 1 GB = 1073741824 bytes
-            //await data.TCPWithStreamingSingleClient();
-            //await data.TCPWithStopAndWaitSingleClient();
+            Console.WriteLine("Testing TCP protocol, single client,various messages sizes, streaming vs stop and await mechanisms");
+            // Sending 1 MB = 1048576 bytes, 500 MB = 524288000 bytes and 1 GB = 1073741824 bytes
+            await data.TCPWithStreamingSingleClient();
+            await data.TCPWithStopAndWaitSingleClient();
 
-            //Console.WriteLine("\nTesting TCP protocol, multiple clients, streaming vs stop and await mechanisms");
-            //// Sending 1 MB
-            //await data.TCPWithStreamingMultipleClients();
-            //await data.TCPWithStopAndAwaitMultipleClients();
+            Console.WriteLine("\nTesting TCP protocol, multiple clients, streaming vs stop and await mechanisms");
+            // Sending 1 MB
+            await data.TCPWithStreamingMultipleClients();
+            await data.TCPWithStopAndAwaitMultipleClients();
 
-            //Console.WriteLine("\nTesting UDP protocol, single client, various messages sizes, streaming vs stop and await mechanisms");
-            //// Sending 1 MB = 1048576 bytes, 500 MB = 524288000 bytes and 1 GB = 1073741824 bytes
-            //await data.UDPWithStreamingSingleClient();
-            //await data.UDPWithStopAndWaitSingleClient();
+            Console.WriteLine("\nTesting UDP protocol, single client, various messages sizes, streaming vs stop and await mechanisms");
+            // Sending 1 MB = 1048576 bytes, 500 MB = 524 288 000 bytes and 1 GB = 1 073 741 824 bytes
+            await data.UDPWithStreamingSingleClient();
+            await data.UDPWithStopAndWaitSingleClient();
 
             Console.WriteLine("\nTesting UDP protocol, multiple clients, streaming vs stop and await mechanisms");
             // Sending 1 MB
